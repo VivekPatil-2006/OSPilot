@@ -4,6 +4,9 @@
 
 ---
 
+## Screenshots
+![image](https://github.com/VivekPatil-2006/OSPilot/blob/main/Images/OSPILOT-1.png?raw=true)
+
 ## 🚀 Key Features Matrix
 
 | Feature | Powered By | Capabilities |
