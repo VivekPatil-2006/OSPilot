@@ -21,48 +21,6 @@
 
 ---
 
-## 🏛️ System Architecture
-
-```mermaid
-graph TD
-    User([User / Electron Desktop UI]) -->|HTTP / SSE Stream / IPC| FastAPI[FastAPI Backend Engine :8000]
-    
-    subgraph Backend Core
-        FastAPI --> Router[API v1 Router]
-        Router --> ChatAPI[/chat & /chat/stream]
-        Router --> AgentAPI[/agents - LangGraph Orchestrator]
-        Router --> CodingAPI[/coding - AI Coding Assistant]
-        Router --> MemoryAPI[/memory - Multi-Tier Memory]
-        Router --> RAGAPI[/rag - Document Assistant]
-        Router --> AutoAPI[/automation - Desktop Control]
-        Router --> BrowserAPI[/browser - Playwright Agent]
-        Router --> HealthAPI[/health & /health/metrics]
-    end
-
-    subgraph Intelligence & Storage Layer
-        ChatAPI --> Ollama[Local Ollama Service :11434]
-        CodingAPI --> Ollama
-        AgentAPI --> LangGraph[LangGraph StateGraph Nodes]
-        
-        LangGraph --> Planner[Planner Agent]
-        LangGraph --> Retriever[Retriever Agent]
-        LangGraph --> Automation[Automation Agent]
-        LangGraph --> Coding[Coding Agent]
-        LangGraph --> Memory[Memory Agent]
-
-        RAGAPI --> FAISS[(FAISS Vector Index)]
-        RAGAPI --> SQLite[(SQLite Database - WAL Mode)]
-        MemoryAPI --> FAISS
-        MemoryAPI --> SQLite
-    end
-
-    subgraph OS & Browser Control
-        AutoAPI --> PyAutoGUI[PyAutoGUI / PyWinAuto]
-        BrowserAPI --> Playwright[Playwright Browser Engine]
-    end
-```
-
----
 
 ## 🔄 Multi-Agent State Flow
 
