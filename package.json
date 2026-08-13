@@ -1,0 +1,38 @@
+{
+  "name": "ospilot",
+  "version": "1.0.0",
+  "description": "Offline Production-Quality AI Desktop Assistant Shell",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win",
+    "test:backend": "venv\\Scripts\\python.exe -m pytest backend/tests"
+  },
+  "build": {
+    "appId": "com.ospilot.desktop",
+    "productName": "OSPilot Desktop",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "frontend/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^29.1.5",
+    "electron-builder": "^24.13.3"
+  }
+}
+

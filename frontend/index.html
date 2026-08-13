@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self' 'unsafe-inline' http://127.0.0.1:8000; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: http://127.0.0.1:8000;" />
+  <title>OSPilot - Offline Desktop AI Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-header">
+          <div class="logo-icon">OS</div>
+          <div class="sidebar-brand">
+            <h1>OSPilot</h1>
+            <span class="badge">Offline Production AI</span>
+          </div>
+        </div>
+
+        <ul class="nav-menu">
+          <li class="nav-item active" data-tab="chat">
+            <span class="nav-icon">💬</span>
+            <span>Chat</span>
+          </li>
+          <li class="nav-item" data-tab="search">
+            <span class="nav-icon">🔍</span>
+            <span>Semantic Search</span>
+          </li>
+          <li class="nav-item" data-tab="rag">
+            <span class="nav-icon">📄</span>
+            <span>RAG Document</span>
+          </li>
+          <li class="nav-item" data-tab="automation">
+            <span class="nav-icon">🖥️</span>
+            <span>Desktop Control</span>
+          </li>
+          <li class="nav-item" data-tab="browser">
+            <span class="nav-icon">🌐</span>
+            <span>Browser Agent</span>
+          </li>
+          <li class="nav-item" data-tab="coding">
+            <span class="nav-icon">💻</span>
+            <span>AI Coding</span>
+          </li>
+          <li class="nav-item" data-tab="settings">
+            <span class="nav-icon">⚙️</span>
+            <span>Settings</span>
+          </li>
+          <li class="nav-item" data-tab="logs">
+            <span class="nav-icon">📋</span>
+            <span>Logs</span>
+          </li>
+        </ul>
+
+      </div>
+
+      <div class="sidebar-footer">
+        <div>OSPilot Core v1.0.0</div>
+        <div>100% Local & Privacy Safe</div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Container -->
+    <div class="main-workspace">
+      <!-- Top Header Status Bar -->
+      <header class="top-header">
+        <div class="header-left" style="display:flex; align-items:center; gap:0.75rem;">
+          <button type="button" class="mobile-sidebar-toggle" id="btnToggleSidebar"
+            title="Toggle Navigation Menu">☰</button>
+          <h2 class="view-title" id="headerTitle">💬 Interactive Chat</h2>
+        </div>
+        <div class="header-right">
+          <div class="system-status" id="systemStatusBadge">
+            <span class="status-dot offline" id="statusDot"></span>
+            <span class="status-text" id="statusText">Checking Backend...</span>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btnRefreshStatus">Refresh</button>
+        </div>
+      </header>
+
+      <!-- Views -->
+      <main class="views-container">
+
+        <!-- TAB 1: CHAT (WITH HISTORY & STREAMING) -->
+        <section class="view active" id="view-chat">
+          <div class="chat-layout-grid"
+            style="display:grid; grid-template-columns: 240px 1fr; gap: 1rem; height: calc(100vh - 120px);">
+            <!-- Chat History Drawer -->
+            <div class="card" style="display:flex; flex-direction:column; padding:0.75rem; overflow-y:auto;">
+              <button class="btn btn-primary btn-sm" id="btnNewChatSession" style="margin-bottom:0.75rem;">+ New
+                Chat</button>
+              <div
+                style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-dim); margin-bottom:0.5rem;">
+                Chat History</div>
+              <div class="chat-history-list" id="chatHistoryList"
+                style="display:flex; flex-direction:column; gap:0.4rem;">
+                <div class="history-item active" data-session-id="default-session">
+                  <span class="history-icon">💬</span>
+                  <span class="history-title">Current Session</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chat Window -->
+            <div class="chat-container">
+              <div class="chat-header">
+                <div class="card-title" style="margin:0;">Local Ollama LLM Assistant</div>
+                <div class="form-inline" style="gap:0.75rem;">
+                  <label class="form-label" style="margin:0; font-size:0.8rem; cursor:pointer;">
+                    <input type="checkbox" id="chatStreamToggle" checked style="accent-color:var(--accent-cyan);" />
+                    Stream Tokens
+                  </label>
+                  <label class="form-label" style="margin:0; font-size:0.8rem;">Model:</label>
+                  <select class="form-select" id="chatModelSelect"
+                    style="font-size:0.8rem; padding:0.2rem 0.5rem; max-width:240px;">
+                    <optgroup label="⚡ Local / Installed Models">
+                      <option value="gemma3:latest" selected>gemma3:latest (Default)</option>
+                      <option value="qwen3:8b">qwen3:8b (Qwen 3 8B)</option>
+                      <option value="qwen2.5-coder:7b">qwen2.5-coder:7b (Coder)</option>
+                    </optgroup>
+                    <optgroup label="✨ Google Gemini Cloud Models">
+                      <option value="gemini-flash-latest">gemini-flash-latest (Fast Cloud)</option>
+                      <option value="gemini-pro-latest">gemini-pro-latest (Reasoning)</option>
+                    </optgroup>
+                    <optgroup label="☁️ Cloud & Ollama Library Models">
+                      <option value="deepseek-r1:latest">deepseek-r1:latest (DeepSeek R1)</option>
+                      <option value="deepseek-v3:latest">deepseek-v3:latest (DeepSeek V3)</option>
+                      <option value="llama3.3:latest">llama3.3:latest (Meta Llama 3.3)</option>
+                      <option value="llama3.1:8b">llama3.1:8b (Meta Llama 3.1 8B)</option>
+                      <option value="mistral:latest">mistral:latest (Mistral 7B)</option>
+                      <option value="phi4:latest">phi4:latest (Microsoft Phi-4)</option>
+                      <option value="codellama:latest">codellama:latest (Code Llama)</option>
+                      <option value="command-r:latest">command-r:latest (Cohere Command-R)</option>
+                    </optgroup>
+                  </select>
+                </div>
+              </div>
+
+              <div class="chat-messages" id="chatMessages">
+                <div class="chat-bubble assistant">
+                  <div class="msg-content">Hello! I am <strong>OSPilot</strong>, your local offline AI Desktop
+                    Assistant. How can I assist you with code, documents, or desktop tasks today?</div>
+                  <div class="msg-meta"><span>OSPilot Engine</span><span>Just now</span></div>
+                </div>
+              </div>
+
+              <form class="chat-input-area" id="chatForm">
+                <input type="text" class="form-input" id="chatPromptInput"
+                  placeholder="Type your message or instruction..." required autocomplete="off" />
+                <button type="submit" class="btn btn-primary" id="chatSendBtn">
+                  Send
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- TAB 2: SEMANTIC SEARCH & FILE PANEL -->
+        <section class="view" id="view-search">
+          <!-- Sub-navigation Pills inside Semantic Search -->
+          <div class="sub-nav-pills" style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
+            <button type="button" class="sub-nav-pill active" data-search-tab="semantic">🔍 Semantic Vector
+              Search</button>
+            <button type="button" class="sub-nav-pill" data-search-tab="filepanel">📁 File Panel & Explorer</button>
+          </div>
+
+          <!-- SUBPANEL 1: SEMANTIC VECTOR SEARCH -->
+          <div class="search-subpanel" id="search-panel-semantic">
+            <div class="card">
+              <div class="card-title">Directory Indexing & Vector Search</div>
+              <div class="card-description">Scan folders, generate nomic embeddings, and index content into FAISS vector
+                storage.</div>
+
+              <form id="searchIndexForm"
+                style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <button type="submit" class="btn btn-primary" id="startIndexBtn"
+                  style="padding: 0.6rem 1.25rem; font-size: 0.9rem; font-weight: 600;">
+                  ⚡ Index Full System (C:\ & D:\ Drives)
+                </button>
+                <div style="font-size: 0.8rem; color: var(--text-dim);">Scans all files & document embeddings across C:
+                  and D: system drives.</div>
+              </form>
+
+              <div class="progress-container" id="indexProgressContainer" style="display:none; margin-bottom: 1rem;">
+                <div class="progress-bar-fill animated" id="indexProgressBar" style="width: 100%;"></div>
+              </div>
+              <div id="indexStatusMessage"
+                style="font-size:0.8rem; color:var(--accent-cyan); margin-bottom:1rem; display:none;"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Natural Language Semantic Search</div>
+              <form id="searchQueryForm" class="form-inline" style="margin-bottom: 1.25rem;">
+                <input type="text" class="form-input" id="searchQueryInput"
+                  placeholder="Search files using natural queries e.g. 'Where is SQLite session initialized?'"
+                  required />
+                <button type="submit" class="btn btn-primary" id="searchBtn">Search</button>
+              </form>
+
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Filename</th>
+                      <th>Score</th>
+                      <th>Snippet</th>
+                      <th>Location</th>
+                    </tr>
+                  </thead>
+                  <tbody id="searchResultsBody">
+                    <tr>
+                      <td colspan="4" style="text-align:center; color:var(--text-dim); padding:2rem;">No search queries
+                        executed yet. Enter a query above.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBPANEL 2: FILE PANEL & CODE EXPLORER -->
+          <div class="search-subpanel" id="search-panel-filepanel" style="display:none;">
+            <div class="card">
+              <div class="card-title">Project File Panel & Code Explorer</div>
+              <div class="card-description">Navigate directory structure, inspect file metadata, and preview code
+                contents.</div>
+
+              <form id="filePanelForm" class="form-inline" style="margin-bottom:1rem; gap: 0.5rem;">
+                <div style="display: flex; flex: 1; gap: 0.5rem; align-items: center;">
+                  <input type="text" class="form-input" id="filePanelDirPath"
+                    placeholder="Enter directory path e.g. D:/OS Pilot/backend/app" value="D:/OS Pilot/backend/app"
+                    required style="flex: 1;" />
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnBrowseFilePanelDir"
+                    style="white-space: nowrap;" title="Browse folder from GUI">📁 Browse GUI...</button>
+                  <input type="file" id="btnFilePanelPickerHidden" webkitdirectory directory style="display:none;" />
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" id="btnExploreDir"
+                  style="white-space: nowrap;">Explore Directory</button>
+              </form>
+
+              <div style="display:grid; grid-template-columns: 280px 1fr; gap:1rem; min-height:300px;">
+                <!-- File Tree List -->
+                <div class="card" style="padding:0.75rem; max-height:360px; overflow-y:auto;">
+                  <div
+                    style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-dim); margin-bottom:0.5rem;">
+                    File Tree</div>
+                  <div id="fileTreeContainer"
+                    style="font-family:var(--font-mono); font-size:0.8rem; display:flex; flex-direction:column; gap:0.25rem;">
+                    <div style="color:var(--text-dim);">Enter directory path to load files...</div>
+                  </div>
+                </div>
+
+                <!-- File Preview Container -->
+                <div class="card" style="padding:0.75rem; display:flex; flex-direction:column; gap:0.5rem;">
+                  <div
+                    style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:0.4rem;">
+                    <div id="filePreviewTitle" style="font-weight:600; color:var(--accent-cyan); font-size:0.88rem;">
+                      Select a file from the tree to preview...
+                    </div>
+                    <div id="filePreviewMeta" style="display:flex; align-items:center; gap:0.5rem;">
+                      <button type="button" class="btn btn-secondary btn-sm" id="btnCopyFilePreview"
+                        style="display:none; padding:0.15rem 0.5rem; font-size:0.75rem;" title="Copy file contents">📋
+                        Copy Code</button>
+                    </div>
+                  </div>
+                  <pre id="filePreviewContent"
+                    style="flex:1; min-height:280px; max-height:420px; overflow-y:auto; overflow-x:auto; white-space:pre-wrap; word-break:break-word; background:rgba(15, 23, 42, 0.75); border:1px solid var(--panel-border); border-radius:6px; padding:0.75rem; color:#f1f5f9; font-size:0.82rem; line-height:1.5; font-family:var(--font-mono); margin:0;">Select a file from the directory tree to inspect code contents...</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: DOCUMENT ASSISTANT (RAG) -->
+        <section class="view" id="view-rag">
+          <div class="card" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <div class="card-title">Document Q&A & Loader Assistant</div>
+              <div class="card-description">Load, index, and ask questions or request summaries for PDF, DOCX, TXT, and
+                Markdown documents.</div>
+            </div>
+
+            <!-- Document Loader Form -->
+            <form id="ragIndexForm" class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Document Filepath:</label>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <input type="text" class="form-input" id="ragFilePath"
+                  placeholder="e.g. D:/OS Pilot/backend/requirements.txt" required style="flex: 1; min-width: 240px;" />
+                <button type="button" class="btn btn-secondary btn-sm" id="btnBrowseRagFile"
+                  style="white-space: nowrap;" title="Browse file from GUI">📁 Browse GUI...</button>
+                <button type="submit" class="btn btn-primary btn-sm" id="ragIndexBtn" style="white-space: nowrap;">Index
+                  Document</button>
+                <button type="button" class="btn btn-success btn-sm" id="ragSummarizeBtn" style="white-space: nowrap;"
+                  title="Generate AI Summary">⚡ Summarize</button>
+                <input type="file" id="btnFilePickerHidden" style="display:none;" />
+              </div>
+            </form>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+              <label class="form-label" style="margin:0; font-size:0.8rem;">Document Q&A Chat</label>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <label class="form-label" style="margin:0; font-size:0.78rem;">RAG Model:</label>
+                <select class="form-select" id="ragModelSelect"
+                  style="font-size:0.78rem; padding:0.15rem 0.4rem; max-width:180px;">
+                  <option value="gemma3:latest" selected>gemma3:latest (Default)</option>
+                  <option value="gemini-flash-latest">gemini-flash-latest (Gemini Cloud)</option>
+                  <option value="gemini-pro-latest">gemini-pro-latest (Gemini Reasoning)</option>
+                  <option value="qwen3:8b">qwen3:8b</option>
+                  <option value="qwen2.5-coder:7b">qwen2.5-coder:7b</option>
+                  <option value="deepseek-r1:latest">deepseek-r1:latest</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Document Q&A Chat Messages Area -->
+            <div class="chat-messages" id="ragChatMessages"
+              style="height: 300px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--panel-border); border-radius: 8px;">
+              <div class="chat-bubble assistant">
+                <div class="msg-content">Ready for document Q&A. Ask questions or give prompts!</div>
+              </div>
+            </div>
+
+            <!-- Q&A Input Form -->
+            <form class="chat-input-area" id="ragQueryForm" style="padding: 0; background: none; border: none;">
+              <input type="text" class="form-input" id="ragQueryInput"
+                placeholder="e.g. 'Summarize this document', 'Explain section 4', or 'What dependencies are listed?'"
+                required />
+              <button type="submit" class="btn btn-primary" id="ragQueryBtn">Ask</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- TAB 4: DESKTOP AUTOMATION & VOICE CONTROL -->
+        <section class="view" id="view-automation">
+          <div class="card"
+            style="position: relative; display: flex; flex-direction: column; gap: 1.5rem; align-items: center; text-align: center; padding: 2rem 1.5rem;">
+
+            <!-- Top Right Info (i) Icon with Hover Tooltip Popover -->
+            <div class="info-icon-wrapper" style="position: absolute; top: 1.2rem; right: 1.2rem;">
+              <button type="button" class="btn-info-icon" id="btnDesktopInfoIcon"
+                title="Hover to view supported desktop voice operations">ⓘ</button>
+
+              <div class="info-popover" id="desktopInfoPopover">
+                <div class="info-popover-header">
+                  <span>📋 Supported Desktop Voice Operations</span>
+                </div>
+                <div class="info-popover-body">
+                  <div class="info-item">
+                    <strong>🚀 App Management:</strong>
+                    <div>"Open Google Chrome", "Launch Notepad", "Open Calc"</div>
+                  </div>
+                  <div class="info-item">
+                    <strong>🔊 Sound & Volume:</strong>
+                    <div>"Set Laptop Volume to 45", "Mute volume", "Volume up"</div>
+                  </div>
+                  <div class="info-item">
+                    <strong>📁 File & Folder Operations:</strong>
+                    <div>"Create folder Projects in D:/OS Pilot"</div>
+                    <div>"Rename file draft.txt to final.txt"</div>
+                    <div>"Delete file temp.txt" (Password Protected)</div>
+                  </div>
+                  <div class="info-item">
+                    <strong>📷 Screen Capture:</strong>
+                    <div>"Take screenshot", "Capture screen"</div>
+                  </div>
+                  <div class="info-item">
+                    <strong>🔒 Security & System Power:</strong>
+                    <div>"Close application notepad"</div>
+                    <div>"System shutdown", "Restart laptop", "Sleep system"</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Header -->
+            <div style="max-width: 580px;">
+              <div class="card-title" style="justify-content: center; font-size: 1.25rem;">🎙️ Desktop Voice Assistant
+              </div>
+              <div class="card-description" style="margin-bottom: 0;">
+                Control your computer naturally by speaking. Click the microphone below and speak any desktop command!
+              </div>
+            </div>
+
+            <!-- Central Microphone Voice Control Interface -->
+            <div class="voice-control-center">
+              <button type="button" class="mic-pulse-btn" id="btnVoiceMic" title="Click to Speak Desktop Command">
+                <span class="mic-icon">🎙️</span>
+              </button>
+              <div class="voice-status-text" id="voiceStatusText">Click microphone to start listening...</div>
+            </div>
+
+            <!-- Spoken Command & Live Result Output Card -->
+            <div class="voice-result-card" id="voiceResultCard" style="width: 100%; max-width: 600px; display: none;">
+              <div class="voice-transcript-box">
+                <span style="color: var(--accent-cyan); font-weight: 600;">Spoken Command:</span>
+                <span id="voiceTranscriptText" style="font-style: italic;">""</span>
+              </div>
+              <div class="voice-response-box" id="voiceResponseBox">
+                Response output will appear here...
+              </div>
+            </div>
+
+            <!-- Backup Text Input for Spoken-style Instructions -->
+            <form id="voiceTextForm"
+              style="width: 100%; max-width: 600px; display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <input type="text" class="form-input" id="voiceTextInput"
+                placeholder="Or type spoken instruction e.g. 'Set Laptop Volume to 45', 'Open Google Chrome'..."
+                required />
+              <button type="submit" class="btn btn-primary" id="btnVoiceTextSubmit">Execute</button>
+            </form>
+
+          </div>
+
+          <!-- Screenshot Preview Card -->
+          <div class="card" id="screenshotPreviewCard" style="display:none; margin-top: 1rem;">
+            <div class="card-title">Captured Screen Artifact</div>
+            <img id="screenshotImg" class="image-preview-box" src="" alt="Screen Capture" />
+            <div id="screenshotMeta" style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;"></div>
+          </div>
+        </section>
+
+        <!-- TAB 5: BROWSER AUTOMATION -->
+        <section class="view" id="view-browser">
+          <div class="card" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div>
+              <div class="card-title">Autonomous Browser Engine</div>
+              <div class="card-description">Select your target browser and type any search query, website URL, or
+                natural language command to execute.</div>
+            </div>
+
+            <!-- Target System Browser Selection -->
+            <div class="form-inline"
+              style="gap: 0.75rem; align-items: center; background: rgba(15, 23, 42, 0.4); border: 1px solid var(--panel-border); border-radius: 8px; padding: 0.75rem 1rem;">
+              <label class="form-label" style="margin: 0; font-weight: 500; white-space: nowrap;">Target System
+                Browser:</label>
+              <select class="form-select" id="browserTypeSelect" style="max-width: 260px; padding: 0.35rem 0.75rem;">
+                <option value="chrome">🌐 Google Chrome</option>
+                <option value="msedge">🌐 Microsoft Edge</option>
+                <option value="firefox">🦊 Mozilla Firefox</option>
+                <option value="brave">🦁 Brave Browser</option>
+                <option value="opera">🔴 Opera Browser</option>
+                <option value="chromium">🔷 Chromium Engine</option>
+              </select>
+            </div>
+
+            <!-- Single Unified Smart Execution Form -->
+            <form id="browserAgentForm" class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-weight: 500;">Browser Action & Command Prompt:</label>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <input type="text" class="form-input" id="browserAgentTaskInput"
+                  placeholder="e.g. 'open linkedin and search for Person', 'search google for FastAPI', or 'github.com'"
+                  required style="flex: 1; min-width: 260px;" />
+                <button type="submit" class="btn btn-primary" id="btnRunBrowserAgent"
+                  style="white-space: nowrap;">Execute Command</button>
+              </div>
+            </form>
+
+            <!-- Agent Output Window -->
+            <div>
+              <div class="card-title" style="font-size: 0.9rem; margin-bottom: 0.5rem;">Execution Output & Results</div>
+              <div id="browserAgentOutput"
+                style="min-height: 160px; max-height: 260px; overflow-y: auto; padding: 0.85rem; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--panel-border); border-radius: 8px; font-family: var(--font-family); font-size: 0.85rem; line-height: 1.5;">
+                <span style="color: var(--text-dim);">Ready for browser command...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results Table -->
+          <div class="card">
+            <div class="card-title">Web Search & Video Results</div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Link / URL</th>
+                    <th>Source</th>
+                  </tr>
+                </thead>
+                <tbody id="browserResultsBody">
+                  <tr>
+                    <td colspan="3" style="text-align:center; color:var(--text-dim); padding:2rem;">No web search
+                      queries executed yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 6: AI CODING ASSISTANT -->
+        <section class="view" id="view-coding">
+          <div class="card">
+            <div class="card-title">Local AI Coding Assistant</div>
+            <div class="card-description">Powered 100% locally by Ollama (`qwen2.5-coder:7b` / `qwen3:8b`). Zero cloud
+              dependencies.</div>
+
+            <!-- Single Unified Coding Mode Dropdown Selector -->
+            <div
+              style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--panel-border);">
+              <label class="form-label"
+                style="margin: 0; font-weight: 600; font-size: 0.85rem; color: var(--accent-cyan); white-space: nowrap;">⚡
+                Select Coding Operation:</label>
+              <select class="form-select" id="codingModeSelect"
+                style="max-width: 360px; font-size: 0.85rem; padding: 0.4rem 0.8rem; font-weight: 500;">
+                <option value="read" selected>📁 Read & Analyze Project</option>
+                <option value="assistant">💻 Code Assistant (Generate, Explain & Debug)</option>
+                <option value="suggest">🚀 Refactor & Improve</option>
+                <option value="docs">📝 Generate Documentation</option>
+                <option value="repo">❓ Repository Q&A</option>
+              </select>
+            </div>
+
+            <!-- SUBPANEL 1: READ PROJECT -->
+            <div class="coding-subpanel active" id="coding-panel-read">
+              <form id="codingReadProjectForm" class="form-inline" style="margin-bottom:1rem; gap:0.5rem;">
+                <div style="display: flex; flex: 1; gap: 0.5rem; align-items: center;">
+                  <input type="text" class="form-input" id="codingProjectPathInput"
+                    placeholder="Project directory path e.g. D:/OS Pilot/backend/app" required style="flex: 1;" />
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnBrowseCodingProjectDir"
+                    style="white-space: nowrap;" title="Browse folder from GUI">📁 Browse GUI...</button>
+                  <input type="file" id="btnCodingProjectPickerHidden" webkitdirectory directory
+                    style="display:none;" />
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" id="btnCodingReadProject"
+                  style="white-space: nowrap;">Scan & Read Project</button>
+              </form>
+              <div class="json-container" id="codingProjectOutput" style="max-height:280px;">Project structure and
+                summary will appear here after scanning...</div>
+            </div>
+
+            <!-- UNIFIED SUBPANEL 2: CODE ASSISTANT (GENERATE, EXPLAIN & DEBUG) -->
+            <div class="coding-subpanel" id="coding-panel-assistant" style="display:none;">
+              <form id="codingAssistantForm" class="form-group">
+                <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center; margin-bottom:0.5rem;">
+                  <div class="form-inline" style="margin:0;">
+                    <label class="form-label" style="margin:0; font-weight:600;">Action:</label>
+                    <select class="form-select" id="codingAssistantAction"
+                      style="font-size:0.8rem; padding:0.25rem 0.5rem;">
+                      <option value="generate" selected>⚡ Generate Code</option>
+                      <option value="explain">📖 Explain Code</option>
+                      <option value="debug">🐞 Debug & Fix Code</option>
+                    </select>
+                  </div>
+                  <div class="form-inline" style="margin:0;">
+                    <label class="form-label" style="margin:0; font-weight:600;">Language:</label>
+                    <select class="form-select" id="codingAssistantLang"
+                      style="font-size:0.8rem; padding:0.25rem 0.5rem;">
+                      <option value="python" selected>Python</option>
+                      <option value="javascript">JavaScript / Node.js</option>
+                      <option value="typescript">TypeScript</option>
+                      <option value="cpp">C++ / C</option>
+                      <option value="html">HTML5 / CSS3</option>
+                      <option value="sql">SQL</option>
+                    </select>
+                  </div>
+                </div>
+
+                <textarea class="form-textarea" id="codingAssistantPrompt"
+                  placeholder="Enter prompt e.g. 'Write a Python utility to parse JSON log files'..." required
+                  style="min-height:120px; font-family:var(--font-mono);"></textarea>
+
+                <div id="codingAssistantErrorGroup" style="display:none; margin-top:0.4rem;">
+                  <textarea class="form-textarea" id="codingAssistantErrorLog"
+                    placeholder="Optional: Paste error stack trace / log output here..."
+                    style="min-height:70px; font-family:var(--font-mono);"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-sm" id="btnRunCodingAssistant"
+                  style="margin-top:0.4rem;">Execute Action</button>
+              </form>
+
+              <pre class="json-container" id="codingAssistantOutput"
+                style="max-height:300px; color:#a5f3fc; white-space:pre-wrap; font-family:var(--font-mono); margin-top:0.75rem;">AI Code Assistant response will render here...</pre>
+            </div>
+
+            <!-- SUBPANEL 5: REFACTOR & IMPROVE -->
+            <div class="coding-subpanel" id="coding-panel-suggest" style="display:none;">
+              <form id="codingSuggestForm" class="form-group">
+                <div class="form-inline" style="margin-bottom:0.4rem;">
+                  <label class="form-label" style="margin:0">Aspect:</label>
+                  <select class="form-select" id="codingSuggestAspect">
+                    <option value="all">All (Performance, Security, Clean Code)</option>
+                    <option value="performance">Performance Bottlenecks</option>
+                    <option value="security">Security Vulnerabilities</option>
+                    <option value="refactor">Design Patterns & Clean Code</option>
+                  </select>
+                </div>
+                <textarea class="form-textarea" id="codingSuggestCode"
+                  placeholder="Paste code snippet to review and refactor..." required
+                  style="min-height:120px; font-family:var(--font-mono);"></textarea>
+                <button type="submit" class="btn btn-primary btn-sm" style="margin-top:0.4rem;">Analyze &
+                  Refactor</button>
+              </form>
+              <div class="json-container" id="codingSuggestOutput" style="max-height:280px; white-space:pre-wrap;">
+                Refactoring recommendations and optimized code will render here...</div>
+            </div>
+
+            <!-- SUBPANEL 6: GENERATE DOCS -->
+            <div class="coding-subpanel" id="coding-panel-docs" style="display:none;">
+              <form id="codingDocsForm" class="form-group">
+                <div class="form-inline" style="margin-bottom:0.4rem;">
+                  <label class="form-label" style="margin:0">Format:</label>
+                  <select class="form-select" id="codingDocsFormat">
+                    <option value="docstring">Docstring (Python Google/Numpy Style)</option>
+                    <option value="markdown">Markdown API Reference</option>
+                    <option value="readme">README Overview</option>
+                  </select>
+                </div>
+                <textarea class="form-textarea" id="codingDocsCode"
+                  placeholder="Paste code snippet or function to document..." required
+                  style="min-height:120px; font-family:var(--font-mono);"></textarea>
+                <button type="submit" class="btn btn-primary btn-sm" style="margin-top:0.4rem;">Generate
+                  Documentation</button>
+              </form>
+              <div class="json-container" id="codingDocsOutput" style="max-height:280px; white-space:pre-wrap;">
+                Generated documentation will render here...</div>
+            </div>
+
+            <!-- SUBPANEL 7: REPO QUESTION -->
+            <div class="coding-subpanel" id="coding-panel-repo" style="display:none;">
+              <form id="codingRepoForm" class="form-group">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.4rem; align-items: center;">
+                  <input type="text" class="form-input" id="codingRepoPath"
+                    placeholder="Project Path (Optional, default is current workspace)" style="flex: 1;" />
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnBrowseCodingRepoDir"
+                    style="white-space: nowrap;" title="Browse folder from GUI">📁 Browse GUI...</button>
+                  <input type="file" id="btnCodingRepoPickerHidden" webkitdirectory directory style="display:none;" />
+                </div>
+                <textarea class="form-textarea" id="codingRepoQuestion"
+                  placeholder="Ask a question e.g. 'Where is authentication or database session handled?'" required
+                  style="min-height: 100px;"></textarea>
+                <button type="submit" class="btn btn-primary btn-sm" style="margin-top:0.4rem;">Ask Repository
+                  Question</button>
+              </form>
+              <div class="json-container" id="codingRepoOutput" style="max-height:280px; white-space:pre-wrap;">
+                Repository answer grounded in code structure will render here...</div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- TAB 9: SETTINGS & SYSTEM MONITOR -->
+        <section class="view" id="view-settings">
+          <!-- Sub-Navigation Pills inside Settings -->
+          <div
+            style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 0.75rem;">
+            <button type="button" class="btn btn-sm btn-primary settings-subnav-pill active" id="pill-settings-general"
+              data-subtab="general" style="font-size: 0.85rem;">
+              ⚙️ Environment Settings & Status
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary settings-subnav-pill" id="pill-settings-sysmon"
+              data-subtab="sysmon" style="font-size: 0.85rem;">
+              📊 Live System Resource Monitor
+            </button>
+          </div>
+
+          <!-- SUBPANEL A: GENERAL SETTINGS -->
+          <div class="settings-subpanel active" id="settings-panel-general">
+            <div class="card">
+              <div class="card-title">System Status & Environment Settings</div>
+              <div class="status-grid" style="margin-top:1rem;">
+                <div class="metric-card">
+                  <span class="metric-label">FastAPI Engine</span>
+                  <div class="metric-value" id="settingsBackendStatus">Checking...</div>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-label">MongoDB Database</span>
+                  <div class="metric-value" id="settingsMongoStatus" style="font-size:0.85rem; color:var(--accent-cyan);">Connected (v8.2.7 / OSPilot DB)</div>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-label">SQLite Backup DB</span>
+                  <div class="metric-value" id="settingsDbStatus">Checking...</div>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-label">Gemini API Key</span>
+                  <div class="metric-value" style="font-size:0.85rem; color:var(--accent-cyan);">Active
+                    (AQ.Ab8RN...6Qxg)</div>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-label">Ollama Host</span>
+                  <div class="metric-value" style="font-size:0.95rem;">http://localhost:11434</div>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-label">Default LLM Model</span>
+                  <div class="metric-value" style="font-size:0.95rem;">gemma3:latest / Gemini</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 1rem;">
+              <div class="card-title">System Configuration Payload</div>
+              <pre class="json-container" id="settingsJsonOutput">Fetching system health metadata...</pre>
+            </div>
+          </div>
+
+          <!-- SUBPANEL B: SYSTEM MONITOR -->
+          <div class="settings-subpanel" id="settings-panel-sysmon" style="display:none;">
+            <div class="card">
+              <div class="card-title">Live System Performance & Resource Dashboard</div>
+              <div class="card-description">Monitors CPU, Memory, Disk Space, FastAPI Backend, and Ollama VRAM in
+                real-time.</div>
+
+              <div class="status-grid"
+                style="margin-top:1rem; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem;">
+                <div class="metric-card">
+                  <span class="metric-label">CPU Usage %</span>
+                  <div class="metric-value" id="sysmonCpu">0%</div>
+                  <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px; margin-top:0.5rem;">
+                    <div id="sysmonCpuBar"
+                      style="width:0%; height:100%; background:var(--accent-cyan); border-radius:2px; transition:width 0.3s;">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="metric-card">
+                  <span class="metric-label">RAM Memory Usage</span>
+                  <div class="metric-value" id="sysmonRam">0%</div>
+                  <div id="sysmonRamSub" style="font-size:0.75rem; color:var(--text-dim); margin-top:0.2rem;">0 GB / 0
+                    GB</div>
+                </div>
+
+                <div class="metric-card">
+                  <span class="metric-label">Disk Space Free</span>
+                  <div class="metric-value" id="sysmonDisk">0%</div>
+                  <div id="sysmonDiskSub" style="font-size:0.75rem; color:var(--text-dim); margin-top:0.2rem;">0 GB Free
+                  </div>
+                </div>
+
+                <div class="metric-card">
+                  <span class="metric-label">FastAPI API Latency</span>
+                  <div class="metric-value" id="sysmonLatency" style="color:var(--accent-green);">0 ms</div>
+                </div>
+
+                <div class="metric-card">
+                  <span class="metric-label">Active Ollama Model</span>
+                  <div class="metric-value" id="sysmonModel" style="font-size:1rem;">gemma3:latest</div>
+                </div>
+              </div>
+
+              <div class="card" style="margin-top:1rem;">
+                <div class="card-title">Live System Metrics JSON</div>
+                <pre class="json-container" id="sysmonJsonOutput"
+                  style="max-height:180px;">Polling system resource metrics...</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 7: LOGS -->
+        <section class="view" id="view-logs">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Live System Event Log Streamer</div>
+              <button class="btn btn-secondary btn-sm" id="btnClearLogs">Clear Log</button>
+            </div>
+            <div class="terminal-log" id="terminalLog">
+              <div class="log-entry log-info">[SYSTEM INITIALIZED] OSPilot Desktop Shell active. Monitoring events...
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Dangerous Action Confirmation Modal Overlay -->
+  <div class="modal-overlay" id="modalConfirmation">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon-danger">⚠️</div>
+        <div class="modal-title" id="modalTitle">Dangerous Action Confirmation</div>
+      </div>
+      <div class="modal-body" id="modalMessage">
+        Are you sure you want to perform this action?
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary btn-sm" id="modalCancelBtn">Cancel</button>
+        <button type="button" class="btn btn-danger btn-sm" id="modalConfirmBtn">Confirm & Execute</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Laptop Password Confirmation Modal Overlay -->
+  <div class="modal-overlay" id="modalPasswordConfirmation">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon-danger">🔒</div>
+        <div class="modal-title" id="modalPasswordTitle">Security Password Required</div>
+      </div>
+      <div class="modal-body">
+        <p id="modalPasswordMessage" style="margin-bottom:0.75rem; color:var(--text-main);">
+          This is a dangerous operation. Enter your laptop/system password to confirm execution:
+        </p>
+        <form id="passwordConfirmForm">
+          <div class="form-group">
+            <input type="password" class="form-input" id="laptopPasswordInput"
+              placeholder="Enter laptop / system password" required autocomplete="current-password" />
+          </div>
+          <div class="modal-actions" style="margin-top:0.75rem;">
+            <button type="button" class="btn btn-secondary btn-sm" id="modalPasswordCancelBtn">Cancel</button>
+            <button type="submit" class="btn btn-danger btn-sm" id="modalPasswordConfirmBtn">Verify & Execute</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar Mobile Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <script src="renderer.js"></script>
+</body>
+
+</html>
