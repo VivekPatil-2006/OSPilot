@@ -6,7 +6,10 @@
 
 ## Screenshots
 <p align="center">
-  <img src="https://github.com/VivekPatil-2006/OSPilot/blob/main/Images/OSPILOT-1.png?raw=true" width="200">
+  <img src="https://github.com/VivekPatil-2006/OSPilot/blob/main/Images/OSPILOT-1.png?raw=true" width="500">
+  <img src="https://github.com/VivekPatil-2006/OSPilot/blob/main/Images/OSPILOT-2.png?raw=true" width="500">
+  <img src="https://github.com/VivekPatil-2006/OSPilot/blob/main/Images/OSPILOT-3.png?raw=true" width="500">
+
 </p>
 ## 🚀 Key Features Matrix
 
